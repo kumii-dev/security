@@ -48,7 +48,10 @@ app.use(
 );
 
 // ─── CORS — restrict to admin frontend origin ─────────────────────────────────
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(',');
+const allowedOrigins = (process.env.CLIENT_ORIGIN || process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
 app.use(
   cors({
     origin: (origin, callback) => {
