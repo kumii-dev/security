@@ -12,12 +12,20 @@ function AuthSuccessPage() {
   const { isAuthenticated, adminUser } = useAuth();
   const [sent, setSent] = useState(false);
 
+  console.log('[AuthSuccessPage] render — isAuthenticated:', isAuthenticated, '| sent:', sent, '| adminUser:', adminUser?.email);
+
   useEffect(() => {
+    console.log('[AuthSuccessPage] useEffect — isAuthenticated:', isAuthenticated, '| sent:', sent);
     if (!isAuthenticated || sent) return;
 
-    // Notify parent frame
-    if (window.parent !== window) {
+    const isEmbedded = window.parent !== window;
+    console.log('[AuthSuccessPage] isEmbedded:', isEmbedded, '| posting to:', TRUSTED_PARENT);
+
+    if (isEmbedded) {
       window.parent.postMessage({ type: 'MSAL_AUTH_SUCCESS' }, TRUSTED_PARENT);
+      console.log('[AuthSuccessPage] postMessage MSAL_AUTH_SUCCESS sent to', TRUSTED_PARENT);
+    } else {
+      console.warn('[AuthSuccessPage] NOT in iframe — postMessage skipped');
     }
     setSent(true);
   }, [isAuthenticated, sent]);

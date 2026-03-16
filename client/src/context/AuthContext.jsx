@@ -41,13 +41,19 @@ export function AuthProvider({ children }) {
   // ─── Restore session on load ───────────────────────────────────────────────
   useEffect(() => {
     const restoreSession = async () => {
+      console.log('[Auth] restoreSession: checking sessionStorage token, accounts:', accounts.length);
       try {
         const storedToken = sessionStorage.getItem('kumii_access_token');
         if (storedToken && accounts.length > 0) {
+          console.log('[Auth] restoreSession: token found, fetching profile');
           const profile = await authService.getProfile();
+          console.log('[Auth] restoreSession: profile restored for', profile?.user?.email);
           setAdminUser(profile.user);
+        } else {
+          console.log('[Auth] restoreSession: no token or no MSAL account — staying unauthenticated');
         }
-      } catch {
+      } catch (err) {
+        console.error('[Auth] restoreSession ERROR:', err.message);
         sessionStorage.removeItem('kumii_access_token');
       } finally {
         setLoading(false);
@@ -60,21 +66,28 @@ export function AuthProvider({ children }) {
   const handleLogin = async () => {
     setError(null);
     setLoading(true);
+    console.log('[Auth] handleLogin: starting MSAL loginPopup');
     try {
       // Trigger Microsoft popup login
       const msalResponse = await msalInstance.loginPopup(loginRequest);
+      console.log('[Auth] MSAL loginPopup success, account:', msalResponse.account?.username);
       const idToken = msalResponse.idToken;
 
       // Send Microsoft token to backend for verification and admin sync
+      console.log('[Auth] Sending idToken to backend /api/auth/login');
       const sessionData = await authService.verifyAndLogin(idToken);
+      console.log('[Auth] Backend response:', JSON.stringify(sessionData));
 
       // Backend returns { success, data: { token, user } }
       const { token, user } = sessionData.data ?? sessionData;
+      console.log('[Auth] Extracted token:', token ? 'present' : 'MISSING', '| user:', JSON.stringify(user));
 
       // Store the backend-issued token securely
       sessionStorage.setItem('kumii_access_token', token);
       setAdminUser(user);
+      console.log('[Auth] setAdminUser complete:', user?.email);
     } catch (err) {
+      console.error('[Auth] handleLogin ERROR:', err.message, err);
       setError(err.message || 'Authentication failed. Please try again.');
       throw err;
     } finally {

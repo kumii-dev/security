@@ -18,13 +18,21 @@ function LoginPage() {
     ? '/auth-success'
     : (location.state?.from?.pathname || '/dashboard');
 
-  if (isAuthenticated) return <Navigate to={from} replace />;
+  console.log('[LoginPage] isEmbedded:', isEmbedded, '| from:', from, '| isAuthenticated:', isAuthenticated, '| loading:', loading);
+
+  if (isAuthenticated) {
+    console.log('[LoginPage] Already authenticated — redirecting to:', from);
+    return <Navigate to={from} replace />;
+  }
 
   const onLogin = async () => {
+    console.log('[LoginPage] onLogin clicked — isEmbedded:', isEmbedded);
     try {
       await handleLogin();
+      console.log('[LoginPage] handleLogin resolved — navigating to:', from);
       navigate(from, { replace: true });
-    } catch {
+    } catch (err) {
+      console.error('[LoginPage] onLogin caught error:', err.message);
       // error already set in AuthContext
     }
   };
