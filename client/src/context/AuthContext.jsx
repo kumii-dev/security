@@ -6,7 +6,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { useMsal } from '@azure/msal-react';
 import { loginRequest } from '../config/msalConfig';
 import { authService } from '../services/api';
-import { SESSION_IDLE_TIMEOUT, ROLE_PERMISSIONS } from '../constants';
+import { SESSION_IDLE_TIMEOUT, SESSION_MAX_LIFETIME, ROLE_PERMISSIONS } from '../constants';
 
 const AuthContext = createContext(null);
 
@@ -19,6 +19,22 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [idleTimer, setIdleTimer] = useState(null);
+  const [sessionTimer, setSessionTimer] = useState(null);
+
+  // ─── Hard session lifetime (1 hour) ───────────────────────────────────────
+  // Starts when adminUser is set. Forces logout after SESSION_MAX_LIFETIME
+  // regardless of activity. Clears when user logs out.
+  useEffect(() => {
+    if (adminUser) {
+      console.log('[Auth] Hard session timer started — expires in', SESSION_MAX_LIFETIME / 60000, 'minutes');
+      const timer = setTimeout(() => {
+        console.log('[Auth] Hard session lifetime reached — forcing logout');
+        handleLogout('Your session has expired. Please sign in again.');
+      }, SESSION_MAX_LIFETIME);
+      setSessionTimer(timer);
+      return () => clearTimeout(timer);
+    }
+  }, [adminUser?.email]); // only restart if the logged-in user changes
 
   // ─── Idle session timeout ──────────────────────────────────────────────────
   const resetIdleTimer = useCallback(() => {
@@ -123,6 +139,7 @@ export function AuthProvider({ children }) {
     sessionStorage.clear();
     setAdminUser(null);
     if (idleTimer) clearTimeout(idleTimer);
+    if (sessionTimer) clearTimeout(sessionTimer);
     if (IS_EMBEDDED) {
       // logoutPopup() is blocked inside iframes — just reset to login screen
       window.location.replace('/login');

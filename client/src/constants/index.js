@@ -116,8 +116,11 @@ export const REPORT_TYPES = [
 // Export formats
 export const EXPORT_FORMATS = ['CSV', 'Excel', 'PDF'];
 
-// Idle session timeout in milliseconds (15 minutes)
+// Idle session timeout in milliseconds (15 minutes of inactivity)
 export const SESSION_IDLE_TIMEOUT = 15 * 60 * 1000;
+
+// Hard session lifetime in milliseconds (1 hour regardless of activity)
+export const SESSION_MAX_LIFETIME = 60 * 60 * 1000;
 
 // Pagination defaults
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
