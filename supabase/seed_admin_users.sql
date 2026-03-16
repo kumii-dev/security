@@ -20,7 +20,7 @@ INSERT INTO public.admin_users (
 
   -- Super Admin — full access
   (
-    'REPLACE_WITH_OID',               -- portal.azure.com → Users → Object ID
+    '59cc86ba-9083-4ac5-ab82-eadc35302575',
     'khulekani@22onsloane.co',
     'Khulekani',
     'super_admin',
@@ -28,66 +28,71 @@ INSERT INTO public.admin_users (
     true
   ),
 
-  -- Funding Manager — manages startups + applications
-  -- (
-  --   'REPLACE_WITH_OID',
-  --   'funding@22onsloane.co',
-  --   'Funding Manager',
-  --   'funding_manager',
-  --   '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
-  --   true
-  -- ),
+  -- Super Admin
+  (
+    'b2df32c6-5a9d-413a-8bd6-55829703aaad',
+    'sithembiso@22onsloane.co',
+    'Sithembiso',
+    'super_admin',
+    '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
+    true
+  ),
 
-  -- Investor Relations
-  -- (
-  --   'REPLACE_WITH_OID',
-  --   'investors@22onsloane.co',
-  --   'Investor Relations',
-  --   'investor_relations',
-  --   '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
-  --   true
-  -- ),
+  -- Funding Manager
+  (
+    'd25135bd-94c2-4423-ad96-cc3cfe32ee07',
+    'christian@22onsloane.co',
+    'Christian',
+    'funding_manager',
+    '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
+    true
+  ),
 
   -- Impact Analyst
-  -- (
-  --   'REPLACE_WITH_OID',
-  --   'impact@kumii.africa',
-  --   'Impact Analyst',
-  --   'impact_analyst',
-  --   '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
-  --   true
-  -- ),
+  (
+    '22ac4b69-6b1f-48d1-b529-ea5d40d26d77',
+    'mafika@22onsloane.co',
+    'Mafika',
+    'impact_analyst',
+    '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
+    true
+  ),
 
-  -- Compliance Officer
-  -- (
-  --   'REPLACE_WITH_OID',
-  --   'compliance@kumii.africa',
-  --   'Compliance Officer',
-  --   'compliance_officer',
-  --   '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
-  --   true
-  -- ),
+  -- Investor Relations
+  (
+    'ff98cff7-2fa2-47aa-a398-419619c17db2',
+    'noma@kumii.africa',
+    'Noma',
+    'investor_relations',
+    '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
+    true
+  ),
 
   -- Executive View (read-only)
-  -- (
-  --   'REPLACE_WITH_OID',
-  --   'exec@22onsloane.co',
-  --   'Executive',
-  --   'executive_view',
-  --   '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
-  --   true
-  -- )
+  (
+    'b8b7a93f-54ff-462f-bcee-7d398c4626a4',
+    'info@kumii.africa',
+    'Kumii Info',
+    'executive_view',
+    '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
+    true
+  ),
 
-  -- Dummy row to close the VALUES block (remove if adding multiple users)
-  ('dummy-close', 'dummy@dummy.com', 'dummy', 'executive_view', '7ecb6702-3bbc-4ed1-a666-e203977bab9b', false)
+  -- Executive View (read-only)
+  (
+    '698f4f17-c4e0-4f35-b513-3b03459015fe',
+    'kizito@22onsloane.co',
+    'Kizito',
+    'executive_view',
+    '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
+    true
+  )
 
 ON CONFLICT (microsoft_oid) DO UPDATE SET
-  role        = EXCLUDED.role,
+  role         = EXCLUDED.role,
+  email        = EXCLUDED.email,
   display_name = EXCLUDED.display_name,
-  is_active   = EXCLUDED.is_active;
-
--- Remove the dummy row
-DELETE FROM public.admin_users WHERE microsoft_oid = 'dummy-close';
+  is_active    = EXCLUDED.is_active;
 
 -- ── Verify ───────────────────────────────────────────────────────────────────
 SELECT id, email, display_name, role, is_active, last_login_at
