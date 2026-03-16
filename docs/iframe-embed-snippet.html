@@ -1,0 +1,62 @@
+<!-- ============================================================
+  Kumii Admin Dashboard — iframe embed snippet
+  Paste this into your Lovable kumii.africa page component
+  ============================================================ -->
+
+<!--
+  REQUIREMENTS:
+  1. This page must be served from kumii.africa or *.lovable.app
+     (both are in the Content-Security-Policy frame-ancestors on the admin app)
+  2. The user's browser must allow pop-ups from kumii.africa
+     (MSAL uses loginPopup — the sign-in window opens in a pop-up, not inside the iframe)
+  3. Add allow="popups" so the browser doesn't block the sign-in popup
+
+  OPTIONAL ATTRIBUTES:
+  - loading="lazy"   → don't load until scrolled into view
+  - sandbox          → only add if you want extra isolation; omit "allow-popups"
+                       would break MSAL login, so leave sandbox off unless needed
+-->
+
+<iframe
+  src="https://security-xi-eight.vercel.app"
+  title="Kumii Admin Dashboard"
+  width="100%"
+  height="100vh"
+  style="min-height:100vh; border:none; display:block;"
+  frameborder="0"
+  allow="clipboard-write; popups"
+  loading="lazy"
+></iframe>
+
+
+<!-- ── React / JSX version (for Lovable React components) ──────────────────── -->
+<!--
+  If your Lovable page is a React component, use this instead:
+
+  <iframe
+    src="https://security-xi-eight.vercel.app"
+    title="Kumii Admin Dashboard"
+    width="100%"
+    style={{ minHeight: '100vh', border: 'none', display: 'block' }}
+    allow="clipboard-write; popups"
+    loading="lazy"
+  />
+-->
+
+
+<!-- ── Full-page embed (recommended) ──────────────────────────────────────── -->
+<!--
+  If you want the dashboard to fill the entire page (no scroll bars on the outer page):
+
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    #admin-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: none; }
+  </style>
+
+  <iframe
+    id="admin-frame"
+    src="https://security-xi-eight.vercel.app"
+    title="Kumii Admin Dashboard"
+    allow="clipboard-write; popups"
+  ></iframe>
+-->
