@@ -74,6 +74,13 @@ export function AuthProvider({ children }) {
       // Store the backend-issued token securely
       sessionStorage.setItem('kumii_access_token', token);
       setAdminUser(user);
+
+      // Notify parent frame (kumii.africa) that Microsoft auth succeeded.
+      // Lovable's SecurityDashboard.tsx listens for this to set kumii_msal_verified,
+      // which gates access to /admin/audit-logs.
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'MSAL_AUTH_SUCCESS' }, 'https://kumii.africa');
+      }
     } catch (err) {
       setError(err.message || 'Authentication failed. Please try again.');
       throw err;
