@@ -100,4 +100,3 @@ if (!isVerified) {
 - No Edge Functions required
 - The `sessionStorage` flag is tab-scoped and expires after 8 hours
 - The gate UI renders in-place — the user is **not** redirected, they see clear instructions
-
