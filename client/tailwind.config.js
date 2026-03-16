@@ -4,58 +4,63 @@ export default {
   theme: {
     extend: {
       colors: {
+        // ── Kumii olive-green primary ──────────────────────────────────────
+        // Built from --olive-green: #7a8567 and --sage-green: #c5df96
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#1d4ed8',
-          700: '#1e3a8a',
-          800: '#1e3a6e',
-          900: '#172554',
-          950: '#0f172a',
+          50:  '#f5f7f2',   // near-white tint
+          100: '#e8eddf',   // very light sage
+          200: '#d3dfbe',   // light sage
+          300: '#c5df96',   // --sage-green (highlight / active bg)
+          400: '#adc47a',
+          500: '#96ab61',
+          600: '#7a8567',   // --olive-green / --primary-color
+          700: '#6a7558',   // --orange-hover (hover state)
+          800: '#55603f',
+          900: '#3e4a28',
+          950: '#282f18',
         },
+        // ── Sage / success ─────────────────────────────────────────────────
         secondary: {
-          50: '#ecfdf5',
-          100: '#d1fae5',
-          200: '#a7f3d0',
-          300: '#6ee7b7',
-          400: '#34d399',
-          500: '#10b981',
-          600: '#059669',
-          700: '#047857',
-          800: '#065f46',
-          900: '#064e3b',
+          50:  '#f5f7f2',
+          100: '#e8eddf',
+          200: '#d3dfbe',
+          300: '#c5df96',   // --success-color / --sage-green
+          400: '#adc47a',
+          500: '#96ab61',
+          600: '#7a8567',
+          700: '#6a7558',
+          800: '#55603f',
+          900: '#3e4a28',
         },
+        // ── Accent (neutral warm tones) ────────────────────────────────────
         accent: {
-          50: '#fff7ed',
-          100: '#ffedd5',
-          200: '#fed7aa',
-          300: '#fdba74',
-          400: '#fb923c',
-          500: '#f97316',
-          600: '#ea580c',
-          700: '#c2410c',
+          50:  '#f5f7f2',
+          100: '#e8eddf',
+          200: '#d3dfbe',
+          300: '#c5df96',
+          400: '#adc47a',
+          500: '#96ab61',
+          600: '#7a8567',
+          700: '#6a7558',
         },
+        // ── Surface / layout ───────────────────────────────────────────────
         surface: {
-          DEFAULT: '#f8fafc',
-          card: '#ffffff',
-          border: '#e2e8f0',
-          muted: '#64748b',
+          DEFAULT: '#F5F5F3',   // --light-bg / --gray-light
+          card:    '#ffffff',
+          border:  '#E5E5E3',   // --border-color / --gray-medium
+          muted:   '#666666',   // --secondary-color / --text-secondary
         },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        card: '0 1px 3px 0 rgba(0,0,0,0.06), 0 1px 2px -1px rgba(0,0,0,0.06)',
-        'card-hover': '0 4px 12px 0 rgba(0,0,0,0.10)',
-        nav: '0 1px 0 0 #e2e8f0',
+        card:       '0 1px 3px 0 rgba(0,0,0,0.06), 0 1px 2px -1px rgba(0,0,0,0.06)',
+        'card-hover': '0 4px 12px 0 rgba(122,133,103,0.15)',
+        nav:        '0 1px 0 0 #E5E5E3',
       },
       borderRadius: {
-        xl: '0.75rem',
+        xl:  '0.75rem',
         '2xl': '1rem',
       },
     },
