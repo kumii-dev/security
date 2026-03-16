@@ -10,8 +10,13 @@ function LoginPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Redirect to the page the user was trying to reach, or /dashboard
-  const from = location.state?.from?.pathname || '/dashboard';
+  // Redirect to the page the user was trying to reach, or /dashboard.
+  // When embedded in an iframe, always go to /auth-success so the parent
+  // frame receives MSAL_AUTH_SUCCESS and navigates to /admin/audit-logs.
+  const isEmbedded = window.parent !== window;
+  const from = isEmbedded
+    ? '/auth-success'
+    : (location.state?.from?.pathname || '/dashboard');
 
   if (isAuthenticated) return <Navigate to={from} replace />;
 

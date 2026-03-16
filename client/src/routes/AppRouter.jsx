@@ -11,6 +11,7 @@ import LoadingScreen from '../components/ui/LoadingScreen';
 // ─── Lazy-loaded pages ────────────────────────────────────────────────────────
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'));
 const AuthCallbackPage = lazy(() => import('../pages/auth/AuthCallbackPage'));
+const AuthSuccessPage = lazy(() => import('../pages/auth/AuthSuccessPage'));
 const UnauthorizedPage = lazy(() => import('../pages/auth/UnauthorizedPage'));
 const DashboardPage = lazy(() => import('../pages/DashboardPage'));
 const StartupsPage = lazy(() => import('../pages/startups/StartupsPage'));
@@ -37,6 +38,7 @@ function AppRouter() {
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route path="/auth/success" element={<AuthSuccessPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
             {/* Protected admin routes */}
