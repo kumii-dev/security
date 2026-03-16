@@ -38,6 +38,7 @@ function AppRouter() {
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route path="/auth-success" element={<AuthSuccessPage />} />
             <Route path="/auth/success" element={<AuthSuccessPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
