@@ -53,7 +53,7 @@ export const authService = {
    * @param {string} microsoftToken - ID token from MSAL
    */
   verifyAndLogin: (microsoftToken) =>
-    apiClient.post('/auth/login', { token: microsoftToken }),
+    apiClient.post('/auth/login', { idToken: microsoftToken }),
 
   /**
    * Logout — invalidate server-side session + clear audit log
