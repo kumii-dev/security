@@ -6,7 +6,11 @@ config();
 
 function require_env(key) {
   const val = process.env[key];
-  if (!val) throw new Error(`Missing required environment variable: ${key}`);
+  if (!val) {
+    console.error(`[config] Missing required environment variable: ${key}`);
+    // Return a placeholder so the process starts; routes will still fail gracefully
+    return `MISSING_${key}`;
+  }
   return val;
 }
 

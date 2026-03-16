@@ -41,9 +41,18 @@ app.use(
         connectSrc: ["'self'", 'https://kumii.africa', 'https://*.supabase.co'],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
+        frameAncestors: [
+          "'self'",
+          'https://kumii.africa',
+          'https://*.lovable.app',
+          'https://*.lovableproject.com',
+          'https://*.gptengineer.app',
+        ],
       },
     },
-    crossOriginEmbedderPolicy: true,
+    // Allow iframe embedding from kumii.africa — do not set DENY
+    frameguard: false,
+    crossOriginEmbedderPolicy: false,
   })
 );
 
@@ -93,7 +102,10 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth', authLimiter);
 
-// ─── Health check ─────────────────────────────────────────────────────────────
+// ─── Health check (accessible via /api/health through Vercel rewrite) ────────
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), service: 'kumii-admin-api' });
+});
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString(), service: 'kumii-admin-api' });
 });
