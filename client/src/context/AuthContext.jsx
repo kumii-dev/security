@@ -10,6 +10,9 @@ import { SESSION_IDLE_TIMEOUT, ROLE_PERMISSIONS } from '../constants';
 
 const AuthContext = createContext(null);
 
+// True when this app is running inside a parent iframe (e.g. kumii.africa)
+const IS_EMBEDDED = window.parent !== window;
+
 export function AuthProvider({ children }) {
   const { instance: msalInstance, accounts } = useMsal();
   const [adminUser, setAdminUser] = useState(null);
@@ -19,6 +22,9 @@ export function AuthProvider({ children }) {
 
   // ─── Idle session timeout ──────────────────────────────────────────────────
   const resetIdleTimer = useCallback(() => {
+    // Don't run idle timeout inside an iframe — the user can't interact with
+    // the browser directly and logoutPopup() would be blocked anyway.
+    if (IS_EMBEDDED) return;
     if (idleTimer) clearTimeout(idleTimer);
     const timer = setTimeout(() => {
       handleLogout('Session expired due to inactivity.');
@@ -41,6 +47,13 @@ export function AuthProvider({ children }) {
   // ─── Restore session on load ───────────────────────────────────────────────
   useEffect(() => {
     const restoreSession = async () => {
+      // If handleLogin already set adminUser (fresh login), don't overwrite or
+      // clear it — this effect re-runs when `accounts` changes after loginPopup.
+      if (adminUser) {
+        console.log('[Auth] restoreSession: adminUser already set, skipping');
+        setLoading(false);
+        return;
+      }
       console.log('[Auth] restoreSession: checking sessionStorage token, accounts:', accounts.length);
       try {
         const storedToken = sessionStorage.getItem('kumii_access_token');
@@ -54,7 +67,11 @@ export function AuthProvider({ children }) {
         }
       } catch (err) {
         console.error('[Auth] restoreSession ERROR:', err.message);
-        sessionStorage.removeItem('kumii_access_token');
+        // Only wipe token if we don't already have an adminUser in state
+        // (avoids race where getProfile fails milliseconds after fresh login)
+        if (!adminUser) {
+          sessionStorage.removeItem('kumii_access_token');
+        }
       } finally {
         setLoading(false);
       }
@@ -97,6 +114,7 @@ export function AuthProvider({ children }) {
 
   // ─── Logout ────────────────────────────────────────────────────────────────
   const handleLogout = async (reason) => {
+    console.log('[Auth] handleLogout, reason:', reason, '| IS_EMBEDDED:', IS_EMBEDDED);
     try {
       await authService.logout();
     } catch {
@@ -105,9 +123,13 @@ export function AuthProvider({ children }) {
     sessionStorage.clear();
     setAdminUser(null);
     if (idleTimer) clearTimeout(idleTimer);
-    // Clear MSAL session
-    await msalInstance.logoutPopup();
-    window.location.href = '/login';
+    if (IS_EMBEDDED) {
+      // logoutPopup() is blocked inside iframes — just reset to login screen
+      window.location.replace('/login');
+    } else {
+      await msalInstance.logoutPopup();
+      window.location.href = '/login';
+    }
   };
 
   // ─── Permission check ─────────────────────────────────────────────────────
