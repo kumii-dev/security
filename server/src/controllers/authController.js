@@ -13,8 +13,8 @@ function signSessionToken(user) {
       role: user.role,
       tenantId: user.tenant_id,
     },
-    config.jwt.secret,
-    { algorithm: 'HS256', expiresIn: config.jwt.expiresIn }
+    config.jwtSecret,
+    { algorithm: 'HS256', expiresIn: config.jwtExpiresIn }
   );
 }
 
@@ -26,7 +26,9 @@ function signSessionToken(user) {
 export async function login(req, res, next) {
   try {
     const msIdentity = req.msIdentity;
+    console.log('[login] msIdentity:', JSON.stringify(msIdentity));
     const email = msIdentity.email || msIdentity.preferred_username || '';
+    console.log('[login] email:', email);
 
     // Enforce allowed domains (e.g. 22onsloane.co)
     if (config.azure.allowedDomains.length > 0) {

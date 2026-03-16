@@ -31,26 +31,36 @@ function getSigningKey(header) {
  */
 export async function validateToken(req, res, next) {
   try {
+    // Accept token from Authorization header OR from request body (login endpoint)
+    let token;
     const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
+    if (authHeader?.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+      console.log('[validateToken] token from Authorization header');
+    } else if (req.body?.idToken) {
+      token = req.body.idToken;
+      console.log('[validateToken] token from request body (idToken)');
+    } else {
+      console.log('[validateToken] no token found');
       return res.status(401).json({ success: false, error: { code: 'MISSING_TOKEN', message: 'Bearer token required.' } });
     }
 
-    const token = authHeader.split(' ')[1];
-
     // Decode header to extract kid without full verification (needed for JWKS lookup)
     const decoded = jwt.decode(token, { complete: true });
+    console.log('[validateToken] decoded header:', decoded?.header);
     if (!decoded?.header?.kid) {
       return res.status(401).json({ success: false, error: { code: 'INVALID_TOKEN', message: 'Malformed token.' } });
     }
 
     const signingKey = await getSigningKey(decoded.header);
+    console.log('[validateToken] got signing key, verifying…');
 
     const verified = jwt.verify(token, signingKey, {
       algorithms: ['RS256'],
       audience: config.azure.clientId,
       issuer: `https://login.microsoftonline.com/${config.azure.tenantId}/v2.0`,
     });
+    console.log('[validateToken] verified claims — tid:', verified.tid, 'email:', verified.email || verified.preferred_username);
 
     // Enforce tenant
     if (verified.tid && verified.tid !== config.azure.tenantId) {
@@ -61,7 +71,8 @@ export async function validateToken(req, res, next) {
     req.msIdentity = verified;
     next();
   } catch (err) {
+    console.error('[validateToken] FAILED:', err.message, err.stack?.split('\n')[1]);
     logger.warn({ event: 'token_validation_failed', error: err.message, requestId: req.id });
-    return res.status(401).json({ success: false, error: { code: 'INVALID_TOKEN', message: 'Token validation failed.' } });
+    return res.status(401).json({ success: false, error: { code: 'INVALID_TOKEN', message: err.message } });
   }
 }
