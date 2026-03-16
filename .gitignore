@@ -1,11 +1,14 @@
 # ─── Environment files (contain secrets) ─────────────────────────────────────
 .env
+.env.example
 .env.local
 .env.production
 server/.env
+server/.env.example
 server/.env.local
 server/.env.production
 client/.env
+client/.env.example
 client/.env.local
 client/.env.production
 
