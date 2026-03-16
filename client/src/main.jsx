@@ -17,30 +17,37 @@ const queryClient = new QueryClient({
   },
 });
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <MsalProvider instance={msalInstance}>
-      <QueryClientProvider client={queryClient}>
-        <App />
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#1e3a8a',
-              color: '#fff',
-              fontSize: '14px',
-              borderRadius: '8px',
-            },
-            success: {
-              style: { background: '#047857', color: '#fff' },
-            },
-            error: {
-              style: { background: '#dc2626', color: '#fff' },
-            },
-          }}
-        />
-      </QueryClientProvider>
-    </MsalProvider>
-  </React.StrictMode>
-);
+// Wrap in async bootstrap to avoid top-level await (unsupported in ES2020 target)
+async function bootstrap() {
+  await msalInstance.initialize();
+
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    <React.StrictMode>
+      <MsalProvider instance={msalInstance}>
+        <QueryClientProvider client={queryClient}>
+          <App />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#1e3a8a',
+                color: '#fff',
+                fontSize: '14px',
+                borderRadius: '8px',
+              },
+              success: {
+                style: { background: '#047857', color: '#fff' },
+              },
+              error: {
+                style: { background: '#dc2626', color: '#fff' },
+              },
+            }}
+          />
+        </QueryClientProvider>
+      </MsalProvider>
+    </React.StrictMode>
+  );
+}
+
+bootstrap();

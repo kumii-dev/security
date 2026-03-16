@@ -47,9 +47,7 @@ export const apiRequest = {
   scopes: [import.meta.env.VITE_AZURE_API_SCOPE || 'api://kumii-admin/.default'],
 };
 
+// Export the uninitialised instance — main.jsx calls .initialize() inside an async bootstrap
 export const msalInstance = new PublicClientApplication(msalConfig);
-
-// Initialize before rendering
-await msalInstance.initialize();
 
 export default msalConfig;
