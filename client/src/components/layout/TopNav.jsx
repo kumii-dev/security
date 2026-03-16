@@ -51,7 +51,7 @@ function TopNav({ onMenuClick }) {
         <div>
           <h1 className="text-base font-semibold text-slate-900">{currentSection}</h1>
           <p className="text-xs text-slate-400 hidden sm:block">
-            Kumii Capital Access Platform
+            2026 Kumii (Powered by 22 On Sloane)
           </p>
         </div>
       </div>

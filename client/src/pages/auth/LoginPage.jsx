@@ -95,7 +95,7 @@ function LoginPage() {
         </div>
 
         <p className="text-center text-primary-300 text-xs mt-6">
-          © {new Date().getFullYear()} Kumii Capital Access Platform
+          © {new Date().getFullYear()} Kumii (Powered by 22 On Sloane)
         </p>
       </div>
     </div>
