@@ -7,38 +7,71 @@ which fires the message and shows an "Identity Verified" confirmation screen.
 
 ---
 
-## 1. Update `SecurityDashboard.tsx`
+## PROBLEM: `/admin/security-dashboard` shows a blank screen
 
-Add a `useEffect` that listens for `message` events on `window`:
-
-- Only accept messages where `e.origin === "https://security-xi-eight.vercel.app"`
-- When `e.data.type === "MSAL_AUTH_SUCCESS"`:
-  - Call `sessionStorage.setItem("kumii_msal_verified", Date.now().toString())`
-  - Then immediately navigate to `/admin/audit-logs` using the router
-
-```ts
-useEffect(() => {
-  const handler = (e: MessageEvent) => {
-    if (e.origin !== 'https://security-xi-eight.vercel.app') return;
-    if (e.data?.type === 'MSAL_AUTH_SUCCESS') {
-      sessionStorage.setItem('kumii_msal_verified', Date.now().toString());
-      navigate('/admin/audit-logs');
-    }
-  };
-  window.addEventListener('message', handler);
-  return () => window.removeEventListener('message', handler);
-}, [navigate]);
-```
+The most likely cause is the `SecurityDashboard.tsx` page component does not yet contain an
+`<iframe>` that actually loads the Vercel app. Replace the entire page with the implementation below.
 
 ---
 
-## 2. Update `AuditLogs.tsx`
+## Full replacement for `SecurityDashboard.tsx`
 
-After the existing admin/auditor role check passes, add a second check:
+Replace the entire file with this:
 
-```ts
-const verified = sessionStorage.getItem('kumii_msal_verified');
-const isVerified = verified && (Date.now() - Number(verified)) < 8 * 60 * 60 * 1000;
+```tsx
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+const IFRAME_ORIGIN = "https://security-xi-eight.vercel.app";
+
+export default function SecurityDashboard() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.origin !== IFRAME_ORIGIN) return;
+      if (e.data?.type === "MSAL_AUTH_SUCCESS") {
+        sessionStorage.setItem("kumii_msal_verified", Date.now().toString());
+        navigate("/admin/audit-logs");
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, [navigate]);
+
+  return (
+    <div style={{ width: "100%", height: "100vh", overflow: "hidden" }}>
+      <iframe
+        src={IFRAME_ORIGIN}
+        title="Kumii Security Dashboard"
+        allow="clipboard-write; popups"
+        style={{
+          width: "100%",
+          height: "100%",
+          border: "none",
+          display: "block",
+        }}
+      />
+    </div>
+  );
+}
+```
+
+**Key points:**
+- The outer `div` must be `height: 100vh` — without an explicit height the iframe renders at 0px (blank screen)
+- `allow="popups"` is required — MSAL's Microsoft sign-in opens a popup window; without this the browser silently blocks it
+- Do not add `sandbox` — it would block the popup
+- The `useEffect` listens for `MSAL_AUTH_SUCCESS` from the iframe and navigates to `/admin/audit-logs`
+
+---
+
+## Update `AuditLogs.tsx`
+
+After the existing admin/auditor role check passes, add a second verification check:
+
+```tsx
+const verified = sessionStorage.getItem("kumii_msal_verified");
+const isVerified = verified && Date.now() - Number(verified) < 8 * 60 * 60 * 1000;
 
 if (!isVerified) {
   return (
@@ -67,3 +100,4 @@ if (!isVerified) {
 - No Edge Functions required
 - The `sessionStorage` flag is tab-scoped and expires after 8 hours
 - The gate UI renders in-place — the user is **not** redirected, they see clear instructions
+
