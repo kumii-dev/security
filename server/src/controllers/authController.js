@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import config from '../config/index.js';
-import { upsertAdminUser, getAdminUserById } from '../services/adminUserService.js';
+import { upsertAdminUser, getAdminUserByOid } from '../services/adminUserService.js';
 import { writeAuditLog } from '../services/auditLogService.js';
 import { logger } from '../utils/logger.js';
 
@@ -39,9 +39,9 @@ export async function login(req, res, next) {
       }
     }
 
-    // Resolve role — default to executive_view; extend this logic to read from
-    // an Entra group membership claim or a pre-seeded Supabase roles table.
-    const existingUser = await getAdminUserById(msIdentity.oid).catch(() => null);
+    // Resolve role from existing Supabase row (seeded via seed_admin_users.sql).
+    // Falls back to executive_view only if the user has never been seeded.
+    const existingUser = await getAdminUserByOid(msIdentity.oid).catch(() => null);
     const role = existingUser?.role || 'executive_view';
 
     const adminUser = await upsertAdminUser(msIdentity, role);

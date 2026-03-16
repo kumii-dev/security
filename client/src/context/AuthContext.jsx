@@ -6,7 +6,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { useMsal } from '@azure/msal-react';
 import { loginRequest } from '../config/msalConfig';
 import { authService } from '../services/api';
-import { SESSION_IDLE_TIMEOUT } from '../constants';
+import { SESSION_IDLE_TIMEOUT, ROLE_PERMISSIONS } from '../constants';
 
 const AuthContext = createContext(null);
 
@@ -114,7 +114,6 @@ export function AuthProvider({ children }) {
   const hasPermission = useCallback(
     (module) => {
       if (!adminUser) return false;
-      const { ROLE_PERMISSIONS } = require('../constants');
       const perms = ROLE_PERMISSIONS[adminUser.role] || [];
       return perms.includes('*') || perms.includes(module);
     },
