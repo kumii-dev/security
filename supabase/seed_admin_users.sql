@@ -38,52 +38,52 @@ INSERT INTO public.admin_users (
     true
   ),
 
-  -- Funding Manager
+  -- Super Admin
   (
     'd25135bd-94c2-4423-ad96-cc3cfe32ee07',
     'christian@22onsloane.co',
     'Christian',
-    'funding_manager',
+    'super_admin',
     '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
     true
   ),
 
-  -- Impact Analyst
+  -- Super Admin
   (
     '22ac4b69-6b1f-48d1-b529-ea5d40d26d77',
     'mafika@22onsloane.co',
     'Mafika',
-    'impact_analyst',
+    'super_admin',
     '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
     true
   ),
 
-  -- Investor Relations
+  -- Super Admin
   (
     'ff98cff7-2fa2-47aa-a398-419619c17db2',
     'noma@kumii.africa',
     'Noma',
-    'investor_relations',
+    'super_admin',
     '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
     true
   ),
 
-  -- Executive View (read-only)
+  -- Super Admin
   (
     'b8b7a93f-54ff-462f-bcee-7d398c4626a4',
     'info@kumii.africa',
     'Kumii Info',
-    'executive_view',
+    'super_admin',
     '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
     true
   ),
 
-  -- Executive View (read-only)
+  -- Super Admin
   (
     '698f4f17-c4e0-4f35-b513-3b03459015fe',
     'kizito@22onsloane.co',
     'Kizito',
-    'executive_view',
+    'super_admin',
     '7ecb6702-3bbc-4ed1-a666-e203977bab9b',
     true
   )
