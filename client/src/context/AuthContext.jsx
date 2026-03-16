@@ -64,11 +64,9 @@ export function AuthProvider({ children }) {
       // Trigger Microsoft popup login
       const msalResponse = await msalInstance.loginPopup(loginRequest);
       const idToken = msalResponse.idToken;
-      console.log('[Auth] MSAL login success, got idToken, sending to backend…');
 
       // Send Microsoft token to backend for verification and admin sync
       const sessionData = await authService.verifyAndLogin(idToken);
-      console.log('[Auth] Backend response:', sessionData);
 
       // Backend returns { success, data: { token, user } }
       const { token, user } = sessionData.data ?? sessionData;
@@ -76,9 +74,7 @@ export function AuthProvider({ children }) {
       // Store the backend-issued token securely
       sessionStorage.setItem('kumii_access_token', token);
       setAdminUser(user);
-      console.log('[Auth] Logged in as:', user?.email);
     } catch (err) {
-      console.error('[Auth] Login error:', err?.response ?? err);
       setError(err.message || 'Authentication failed. Please try again.');
       throw err;
     } finally {
