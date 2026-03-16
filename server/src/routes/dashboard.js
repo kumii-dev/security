@@ -1,11 +1,14 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { getStats, getAlerts } from '../controllers/dashboardController.js';
+import { getMetrics, getAnalytics, getAlerts, getRecentActivity, getStats } from '../controllers/dashboardController.js';
 
 const router = Router();
 router.use(requireAuth);
 
-router.get('/stats', getStats);
+router.get('/metrics', getMetrics);
+router.get('/analytics', getAnalytics);
 router.get('/alerts', getAlerts);
+router.get('/recent-activity', getRecentActivity);
+router.get('/stats', getStats); // legacy alias
 
 export default router;
