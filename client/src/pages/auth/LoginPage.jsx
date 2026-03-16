@@ -2,13 +2,27 @@
  * Login page — Microsoft Entra ID only
  */
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 function LoginPage() {
   const { isAuthenticated, loading, handleLogin, error } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  // Redirect to the page the user was trying to reach, or /dashboard
+  const from = location.state?.from?.pathname || '/dashboard';
+
+  if (isAuthenticated) return <Navigate to={from} replace />;
+
+  const onLogin = async () => {
+    try {
+      await handleLogin();
+      navigate(from, { replace: true });
+    } catch {
+      // error already set in AuthContext
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-950 via-primary-800 to-primary-900 flex items-center justify-center p-4">
@@ -44,7 +58,7 @@ function LoginPage() {
 
           {/* Microsoft Sign In Button */}
           <button
-            onClick={handleLogin}
+            onClick={onLogin}
             disabled={loading}
             className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-slate-800 font-semibold text-sm hover:bg-slate-50 hover:border-primary-300 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
           >

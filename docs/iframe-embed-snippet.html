@@ -11,12 +11,25 @@
      (MSAL uses loginPopup — the sign-in window opens in a pop-up, not inside the iframe)
   3. Add allow="popups" so the browser doesn't block the sign-in popup
 
+  DEEP LINKING:
+  - The admin app is a React SPA. Deep links work — just change the src path:
+      /               → lands on /dashboard after login
+      /audit-logs     → lands on /audit-logs after login (if authorized)
+      /startups       → lands on /startups after login
+  - After Microsoft login the user is automatically redirected back to
+    whichever page they were trying to reach (the "from" state is preserved).
+
+  NOTE: The URL path on kumii.africa is /admin/audit-logs but the iframe
+  src must be https://security-xi-eight.vercel.app/audit-logs
+  (the admin app has no /admin prefix in its own router).
+
   OPTIONAL ATTRIBUTES:
   - loading="lazy"   → don't load until scrolled into view
-  - sandbox          → only add if you want extra isolation; omit "allow-popups"
+  - sandbox          → only add if you want extra isolation; omitting "allow-popups"
                        would break MSAL login, so leave sandbox off unless needed
 -->
 
+<!-- Default: loads dashboard -->
 <iframe
   src="https://security-xi-eight.vercel.app"
   title="Kumii Admin Dashboard"
@@ -28,13 +41,30 @@
   loading="lazy"
 ></iframe>
 
+<!-- Deep link to Audit Logs page (for kumii.africa/admin/audit-logs) -->
+<!--
+<iframe
+  src="https://security-xi-eight.vercel.app/audit-logs"
+  title="Kumii Admin — Audit Logs"
+  width="100%"
+  style="min-height:100vh; border:none; display:block;"
+  frameborder="0"
+  allow="clipboard-write; popups"
+  loading="lazy"
+></iframe>
+-->
+
 
 <!-- ── React / JSX version (for Lovable React components) ──────────────────── -->
 <!--
-  If your Lovable page is a React component, use this instead:
+  Dynamic src based on the current Lovable route — maps /admin/* to the iframe path:
+
+  const ADMIN_BASE = 'https://security-xi-eight.vercel.app';
+  // e.g. if Lovable page is /admin/audit-logs → iframe src = ADMIN_BASE + '/audit-logs'
+  const iframePath = window.location.pathname.replace(/^\/admin/, '') || '/dashboard';
 
   <iframe
-    src="https://security-xi-eight.vercel.app"
+    src={`${ADMIN_BASE}${iframePath}`}
     title="Kumii Admin Dashboard"
     width="100%"
     style={{ minHeight: '100vh', border: 'none', display: 'block' }}
@@ -55,7 +85,7 @@
 
   <iframe
     id="admin-frame"
-    src="https://security-xi-eight.vercel.app"
+    src="https://security-xi-eight.vercel.app/audit-logs"
     title="Kumii Admin Dashboard"
     allow="clipboard-write; popups"
   ></iframe>
