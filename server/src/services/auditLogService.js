@@ -156,3 +156,89 @@ export async function getTrafficStats({ dateFrom, dateTo, limit = 20 } = {}) {
     highRiskCount: rows.filter((r) => r.riskScore === 'high').length,
   };
 }
+
+// ─── Tiny UA parser (no external deps) ────────────────────────────────────────
+function parseUserAgent(ua) {
+  if (!ua) return { browser: 'Unknown', os: 'Unknown', deviceType: 'unknown' };
+
+  // Device type
+  let deviceType = 'desktop';
+  if (/Mobile|Android.*Mobile|iPhone|iPod/i.test(ua)) deviceType = 'mobile';
+  else if (/Tablet|iPad|Android(?!.*Mobile)/i.test(ua)) deviceType = 'tablet';
+
+  // OS
+  let os = 'Other';
+  if (/Windows NT 10/i.test(ua))       os = 'Windows 10/11';
+  else if (/Windows NT/i.test(ua))     os = 'Windows';
+  else if (/Mac OS X/i.test(ua))       os = 'macOS';
+  else if (/iPhone|iPad|iPod/i.test(ua)) os = 'iOS';
+  else if (/Android/i.test(ua))        os = 'Android';
+  else if (/Linux/i.test(ua))          os = 'Linux';
+  else if (/CrOS/i.test(ua))           os = 'ChromeOS';
+
+  // Browser (order matters — Edge must come before Chrome)
+  let browser = 'Other';
+  if (/Edg\//i.test(ua))              browser = 'Microsoft Edge';
+  else if (/OPR\//i.test(ua))         browser = 'Opera';
+  else if (/Chrome\//i.test(ua))      browser = 'Chrome';
+  else if (/Safari\//i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
+  else if (/Firefox\//i.test(ua))     browser = 'Firefox';
+  else if (/MSIE|Trident/i.test(ua))  browser = 'Internet Explorer';
+
+  return { browser, os, deviceType };
+}
+
+/**
+ * Aggregate device / browser / OS statistics from user_agent strings.
+ *
+ * @param {object} options
+ * @param {string} [options.dateFrom]  ISO string
+ * @param {string} [options.dateTo]    ISO string
+ */
+export async function getDeviceStats({ dateFrom, dateTo } = {}) {
+  let query = supabaseAdmin
+    .from('audit_logs')
+    .select('user_agent, admin_email, created_at')
+    .not('user_agent', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(5000);
+
+  if (dateFrom) query = query.gte('created_at', dateFrom);
+  if (dateTo)   query = query.lte('created_at', dateTo);
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  const browserMap  = {};
+  const osMap       = {};
+  const deviceMap   = { desktop: 0, mobile: 0, tablet: 0, unknown: 0 };
+  const total       = data.length;
+
+  for (const row of data) {
+    const { browser, os, deviceType } = parseUserAgent(row.user_agent);
+
+    browserMap[browser] = (browserMap[browser] || 0) + 1;
+    osMap[os]           = (osMap[os] || 0) + 1;
+    deviceMap[deviceType] = (deviceMap[deviceType] || 0) + 1;
+  }
+
+  const toRanked = (map) =>
+    Object.entries(map)
+      .map(([name, count]) => ({
+        name,
+        count,
+        percent: total > 0 ? Math.round((count / total) * 100) : 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+
+  return {
+    total,
+    browsers:    toRanked(browserMap),
+    operatingSystems: toRanked(osMap),
+    deviceTypes: {
+      desktop: { count: deviceMap.desktop, percent: total > 0 ? Math.round((deviceMap.desktop / total) * 100) : 0 },
+      mobile:  { count: deviceMap.mobile,  percent: total > 0 ? Math.round((deviceMap.mobile  / total) * 100) : 0 },
+      tablet:  { count: deviceMap.tablet,  percent: total > 0 ? Math.round((deviceMap.tablet  / total) * 100) : 0 },
+    },
+  };
+}

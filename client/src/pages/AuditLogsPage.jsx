@@ -200,6 +200,178 @@ function TopIpCard({ dateFrom, dateTo }) {
   );
 }
 
+// ─── Top Devices card ──────────────────────────────────────────────────────────
+const DEVICE_ICONS = { desktop: '🖥️', mobile: '📱', tablet: '📲' };
+const BROWSER_ICONS = {
+  'Chrome': '🟡', 'Microsoft Edge': '🔵', 'Safari': '🧭',
+  'Firefox': '🦊', 'Opera': '🔴', 'Internet Explorer': '⚠️', 'Other': '🌐',
+};
+const OS_ICONS = {
+  'Windows 10/11': '🪟', 'Windows': '🪟', 'macOS': '🍎',
+  'iOS': '📱', 'Android': '🤖', 'Linux': '🐧', 'ChromeOS': '🌐', 'Other': '💻',
+};
+
+function HorizontalBar({ percent, colour = 'bg-primary-400' }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex-1 bg-slate-100 rounded-full h-2">
+        <div
+          className={`h-2 rounded-full transition-all ${colour}`}
+          style={{ width: `${Math.max(percent, 2)}%` }}
+        />
+      </div>
+      <span className="text-xs font-semibold text-slate-500 w-9 text-right">{percent}%</span>
+    </div>
+  );
+}
+
+function DeviceDonut({ desktop, mobile, tablet }) {
+  // Simple CSS conic-gradient donut — no extra library needed
+  const d = desktop.percent, m = mobile.percent, t = tablet.percent;
+  const gradient = `conic-gradient(#7a8567 0% ${d}%, #c5df96 ${d}% ${d + m}%, #94a3b8 ${d + m}% 100%)`;
+  return (
+    <div className="flex items-center gap-6">
+      <div className="relative shrink-0" style={{ width: 88, height: 88 }}>
+        <div className="w-full h-full rounded-full" style={{ background: gradient }} />
+        {/* Centre hole */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
+            <span className="text-lg">💻</span>
+          </div>
+        </div>
+      </div>
+      <div className="space-y-1.5 text-sm">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-primary-600 shrink-0" />
+          <span className="text-slate-700">Desktop</span>
+          <span className="ml-auto font-semibold text-slate-900">{desktop.percent}%</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-primary-300 shrink-0" />
+          <span className="text-slate-700">Mobile</span>
+          <span className="ml-auto font-semibold text-slate-900">{mobile.percent}%</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-slate-400 shrink-0" />
+          <span className="text-slate-700">Tablet</span>
+          <span className="ml-auto font-semibold text-slate-900">{tablet.percent}%</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RankedList({ items, icons, colourFn }) {
+  return (
+    <div className="space-y-3">
+      {items.map((item, idx) => (
+        <div key={item.name}>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <span className="text-base leading-none">{icons[item.name] || '🔘'}</span>
+              <span className="text-sm text-slate-700 font-medium">
+                {idx === 0 && <span className="text-xs text-primary-600 font-bold mr-1">#1</span>}
+                {item.name}
+              </span>
+            </div>
+            <span className="text-xs text-slate-500">{item.count.toLocaleString()} req</span>
+          </div>
+          <HorizontalBar percent={item.percent} colour={colourFn(idx)} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TopDevicesCard({ dateFrom, dateTo }) {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['audit-devices', dateFrom, dateTo],
+    queryFn: () => auditService.getDeviceStats({ dateFrom, dateTo }),
+    staleTime: 60_000,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-xl border border-surface-border p-6">
+        <div className="animate-pulse space-y-3">
+          <div className="h-5 bg-slate-100 rounded w-40" />
+          {[...Array(4)].map((_, i) => <div key={i} className="h-10 bg-slate-100 rounded-lg" />)}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) return <ErrorState message={error.message} retry={refetch} />;
+
+  const {
+    total = 0,
+    browsers = [],
+    operatingSystems = [],
+    deviceTypes = { desktop: { count: 0, percent: 0 }, mobile: { count: 0, percent: 0 }, tablet: { count: 0, percent: 0 } },
+  } = data || {};
+
+  const browserColours = ['bg-primary-600', 'bg-primary-400', 'bg-primary-300', 'bg-slate-400', 'bg-slate-300'];
+  const osColours      = ['bg-primary-700', 'bg-primary-500', 'bg-primary-300', 'bg-slate-400', 'bg-slate-300'];
+
+  return (
+    <div className="bg-white rounded-xl border border-surface-border overflow-hidden">
+      {/* Header */}
+      <div className="px-5 py-4 border-b border-surface-border flex items-center justify-between">
+        <div>
+          <h3 className="font-semibold text-slate-900">Top Devices</h3>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Browser, OS & device breakdown · {total.toLocaleString()} sessions analysed
+          </p>
+        </div>
+        <span className="text-2xl">📊</span>
+      </div>
+
+      <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-6 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+
+        {/* Device type donut */}
+        <div>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-4">Device Type</p>
+          <DeviceDonut
+            desktop={deviceTypes.desktop}
+            mobile={deviceTypes.mobile}
+            tablet={deviceTypes.tablet}
+          />
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            {['desktop', 'mobile', 'tablet'].map((type) => (
+              <div key={type} className="text-center bg-slate-50 rounded-lg p-2">
+                <p className="text-lg">{DEVICE_ICONS[type]}</p>
+                <p className="text-xs text-slate-500 capitalize">{type}</p>
+                <p className="font-bold text-slate-800 text-sm">{deviceTypes[type].count.toLocaleString()}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Top browsers */}
+        <div className="pt-4 md:pt-0 md:pl-6">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-4">Browser</p>
+          <RankedList
+            items={browsers.slice(0, 5)}
+            icons={BROWSER_ICONS}
+            colourFn={(i) => browserColours[i] || 'bg-slate-200'}
+          />
+        </div>
+
+        {/* Top operating systems */}
+        <div className="pt-4 md:pt-0 md:pl-6">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-4">Operating System</p>
+          <RankedList
+            items={operatingSystems.slice(0, 5)}
+            icons={OS_ICONS}
+            colourFn={(i) => osColours[i] || 'bg-slate-200'}
+          />
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 // ─── Main page ─────────────────────────────────────────────────────────────────
 function AuditLogsPage() {
   const [activeTab, setActiveTab] = useState('logs');
@@ -298,6 +470,7 @@ function AuditLogsPage() {
             </div>
           </div>
           <TopIpCard dateFrom={filters.date_from} dateTo={filters.date_to} />
+          <TopDevicesCard dateFrom={filters.date_from} dateTo={filters.date_to} />
         </>
       )}
     </div>
