@@ -158,6 +158,7 @@ export const tasksService = {
 export const auditService = {
   getLogs: (params = {}) => apiClient.get('/audit-logs', { params }),
   getById: (id) => apiClient.get(`/audit-logs/${id}`),
+  getTrafficStats: (params = {}) => apiClient.get('/audit-logs/traffic', { params }),
 };
 
 // ─── Settings ─────────────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-import { queryAuditLogs } from '../services/auditLogService.js';
+import { queryAuditLogs, getTrafficStats } from '../services/auditLogService.js';
 
 export async function list(req, res, next) {
   try {
@@ -11,6 +11,18 @@ export async function list(req, res, next) {
       entityType,
       dateFrom,
       dateTo,
+    });
+    return res.json({ success: true, ...result });
+  } catch (err) { next(err); }
+}
+
+export async function trafficStats(req, res, next) {
+  try {
+    const { dateFrom, dateTo, limit } = req.query;
+    const result = await getTrafficStats({
+      dateFrom,
+      dateTo,
+      limit: limit ? Math.min(Number(limit), 50) : 20,
     });
     return res.json({ success: true, ...result });
   } catch (err) { next(err); }
