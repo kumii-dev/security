@@ -36,10 +36,15 @@ const msalConfig = {
   },
 };
 
-// Scopes requested during login
+// Scopes requested during login.
+// maxAge: 0 tells Azure AD the authentication must be fresh (cannot reuse a
+// cached session). Combined with the Conditional Access policy that requires
+// "Multifactor authentication", this guarantees a Microsoft Authenticator
+// push notification is sent on every login.
 export const loginRequest = {
   scopes: ['openid', 'profile', 'email', 'User.Read'],
   prompt: 'select_account',
+  maxAge: 0,
 };
 
 // Scopes for backend API token

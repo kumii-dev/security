@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import config from '../config/index.js';
-import { upsertAdminUser, getAdminUserByOid } from '../services/adminUserService.js';
+import { upsertAdminUser, getAdminUserByOid, getAdminUserById } from '../services/adminUserService.js';
 import { writeAuditLog } from '../services/auditLogService.js';
 import { logger } from '../utils/logger.js';
 

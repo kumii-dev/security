@@ -470,7 +470,9 @@ function AuditLogsPage() {
             </div>
           </div>
           <TopIpCard dateFrom={filters.date_from} dateTo={filters.date_to} />
-          <TopDevicesCard dateFrom={filters.date_from} dateTo={filters.date_to} />
+          <div className="mt-5">
+            <TopDevicesCard dateFrom={filters.date_from} dateTo={filters.date_to} />
+          </div>
         </>
       )}
     </div>
