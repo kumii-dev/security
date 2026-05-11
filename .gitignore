@@ -11,6 +11,7 @@ client/.env
 client/.env.example
 client/.env.local
 client/.env.production
+VERCEL_ENV_VARS.md
 
 # ─── Dependencies ─────────────────────────────────────────────────────────────
 node_modules/
